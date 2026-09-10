@@ -5,6 +5,10 @@ class AppTheme {
   // Premium Islamic Dark Color Palette
   // ─────────────────────────────────────────────
 
+  // Screen Variable Fixes
+  static const Color darkGreen = Color(0xFF0F5132);
+  static const Color green = Color(0xFF176B45);
+
   static const Color primary = Color(0xFF0F5132);
   static const Color primaryDark = Color(0xFF06130F);
   static const Color primaryLight = Color(0xFF176B45);
