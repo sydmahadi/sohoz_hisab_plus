@@ -5,6 +5,9 @@ class AppTheme {
   // Islamic Light Color Palette
   // ─────────────────────────────────────────────
 
+  static const Color darkGreen = Color(0xFF0D5134);
+  static const Color green = Color(0xFF176B45);
+
   static const Color primary = Color(0xFF176B45);
   static const Color primaryDark = Color(0xFF0D5134);
   static const Color primaryLight = Color(0xFF2D8A5F);
@@ -68,21 +71,17 @@ class AppTheme {
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: cardColor,
-
       contentPadding: const EdgeInsets.symmetric(
         horizontal: 18,
         vertical: 16,
       ),
-
       labelStyle: const TextStyle(
         color: textMuted,
         fontWeight: FontWeight.w500,
       ),
-
       hintStyle: const TextStyle(
         color: Color(0xFF9AA49E),
       ),
-
       prefixIconColor: primary,
 
       border: OutlineInputBorder(
@@ -114,7 +113,10 @@ class AppTheme {
       style: ElevatedButton.styleFrom(
         backgroundColor: primary,
         foregroundColor: Colors.white,
-        minimumSize: const Size(double.infinity, 54),
+        minimumSize: const Size(
+          double.infinity,
+          54,
+        ),
         elevation: 0,
         shadowColor: Colors.transparent,
         shape: RoundedRectangleBorder(
