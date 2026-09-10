@@ -24,35 +24,52 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       } else if (value == '=') {
         _calculateResult();
       } else {
+        // পরপর দুটি অপারেটর ইনপুট দেওয়া প্রতিরোধ
+        if (_isOperator(value) && _input.isNotEmpty) {
+          String lastChar = _input[_input.length - 1];
+          if (_isOperator(lastChar)) {
+            _input = _input.substring(0, _input.length - 1) + value;
+            return;
+          }
+        }
         _input += value;
       }
     });
   }
 
+  bool _isOperator(String ch) {
+    return ch == '+' || ch == '-' || ch == '×' || ch == '÷' || ch == '%';
+  }
+
   void _calculateResult() {
+    if (_input.isEmpty) return;
     try {
       String finalInput = _input.replaceAll('×', '*').replaceAll('÷', '/');
-      if (finalInput.isEmpty) return;
-
       double calculated = _evaluateMath(finalInput);
 
-      if (calculated % 1 == 0) {
+      if (calculated.isNaN || calculated.isInfinite) {
+        _result = 'ত্রুটি';
+      } else if (calculated % 1 == 0) {
         _result = calculated.toInt().toString();
       } else {
-        _result = calculated.toStringAsFixed(2);
+        _result = calculated
+            .toStringAsFixed(4)
+            .replaceAll(RegExp(r'0+$'), '')
+            .replaceAll(RegExp(r'\.$'), '');
       }
     } catch (e) {
       _result = 'ত্রুটি';
     }
   }
 
+  // গাণিতিক সমীকরণ সঠিকভাবে সমাধান করার এলগরিদম
   double _evaluateMath(String expression) {
     List<String> tokens = [];
     String numberBuffer = '';
 
     for (int i = 0; i < expression.length; i++) {
       String char = expression[i];
-      if ('+-*/'.contains(char)) {
+      if ('+-*/%'.contains(char)) {
         if (numberBuffer.isNotEmpty) {
           tokens.add(numberBuffer);
           numberBuffer = '';
@@ -66,23 +83,55 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
     if (tokens.isEmpty) return 0;
 
-    double result = double.tryParse(tokens[0]) ?? 0;
-    for (int i = 1; i < tokens.length; i += 2) {
-      if (i + 1 < tokens.length) {
-        String op = tokens[i];
-        double nextNum = double.tryParse(tokens[i + 1]) ?? 0;
-        if (op == '+') result += nextNum;
-        if (op == '-') result -= nextNum;
-        if (op == '*') result *= nextNum;
-        if (op == '/') result = nextNum != 0 ? result / nextNum : 0;
+    // ১ম ধাপ: পার্সেন্টেজ (%) হ্যান্ডেল করা (সংখ্যা/১০০)
+    List<String> pass1 = [];
+    for (int i = 0; i < tokens.length; i++) {
+      if (tokens[i] == '%') {
+        if (pass1.isNotEmpty) {
+          double prevNum = double.tryParse(pass1.removeLast()) ?? 0;
+          pass1.add((prevNum / 100).toString());
+        }
+      } else {
+        pass1.add(tokens[i]);
       }
     }
+
+    // ২য় ধাপ: গুণ (*) এবং ভাগ (/) সমাধান করা
+    List<String> pass2 = [];
+    int i = 0;
+    while (i < pass1.length) {
+      if (pass1[i] == '*' || pass1[i] == '/') {
+        String op = pass1[i];
+        double prev = double.tryParse(pass2.removeLast()) ?? 0;
+        double next = double.tryParse(pass1[i + 1]) ?? 0;
+        double eval = 0;
+        if (op == '*') eval = prev * next;
+        if (op == '/') eval = next != 0 ? prev / next : double.nan;
+        pass2.add(eval.toString());
+        i += 2;
+      } else {
+        pass2.add(pass1[i]);
+        i++;
+      }
+    }
+
+    // ৩য় ধাপ: যোগ (+) এবং বিয়োগ (-) সমাধান করা
+    if (pass2.isEmpty) return 0;
+    double result = double.tryParse(pass2[0]) ?? 0;
+    int j = 1;
+    while (j < pass2.length) {
+      String op = pass2[j];
+      double next = double.tryParse(pass2[j + 1]) ?? 0;
+      if (op == '+') result += next;
+      if (op == '-') result -= next;
+      j += 2;
+    }
+
     return result;
   }
 
   @override
   Widget build(BuildContext context) {
-    // ২০ টি পারফেক্ট বাটন বিন্যাস (৪টি কলাম, ৫টি রো)
     final List<String> buttons = [
       'C', '÷', '×', '⌫',
       '7', '8', '9', '-',
@@ -155,7 +204,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               ),
             ),
 
-            // কিপ্যাড পার্ট (২০ টি বাটন সমানভাবে বিন্যস্ত)
+            // কিপ্যাড পার্ট
             Expanded(
               flex: 6,
               child: Padding(
@@ -172,13 +221,14 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   itemBuilder: (context, index) {
                     final btn = buttons[index];
 
-                    bool isOperator = ['÷', '×', '-', '+', '%', '='].contains(btn);
+                    bool isOperator = ['÷', '×', '-', '+', '%'].contains(btn);
+                    bool isEqual = btn == '=';
                     bool isClear = ['C', '⌫'].contains(btn);
 
                     Color btnBg = AppTheme.cardLight;
                     Color textColor = AppTheme.textDark;
 
-                    if (btn == '=') {
+                    if (isEqual) {
                       btnBg = AppTheme.gold;
                       textColor = Colors.black;
                     } else if (isOperator) {
@@ -201,10 +251,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                             color: btnBg,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: isOperator || btn == '='
+                              color: isOperator || isEqual
                                   ? AppTheme.gold
                                   : AppTheme.gold.withValues(alpha: 0.25),
-                              width: isOperator || btn == '=' ? 1 : 0.6,
+                              width: isOperator || isEqual ? 1 : 0.6,
                             ),
                           ),
                           child: Center(
