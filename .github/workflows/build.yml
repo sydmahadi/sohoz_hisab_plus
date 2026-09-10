@@ -29,7 +29,7 @@ jobs:
           rm -rf android
           flutter create --platforms=android --org com.example .
 
-      - name: Configure Internet Permission and App Name
+      - name: Configure Android
         run: |
           python3 - <<'PY'
           from pathlib import Path
@@ -38,7 +38,6 @@ jobs:
           path = Path("android/app/src/main/AndroidManifest.xml")
           text = path.read_text()
 
-          # Add Internet permission
           permission = '<uses-permission android:name="android.permission.INTERNET"/>'
 
           if 'android.permission.INTERNET' not in text:
@@ -47,7 +46,6 @@ jobs:
                   '<manifest xmlns:android="http://schemas.android.com/apk/res/android">\n\n    ' + permission
               )
 
-          # Set app name
           text = re.sub(
               r'android:label="[^"]*"',
               'android:label="সহজ হিসাব প্লাস"',
@@ -60,6 +58,9 @@ jobs:
 
       - name: Get dependencies
         run: flutter pub get
+
+      - name: Generate App Icon
+        run: dart run flutter_launcher_icons
 
       - name: Build APK
         run: flutter build apk --release
