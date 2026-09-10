@@ -51,17 +51,17 @@ class HomeScreen extends StatelessWidget {
         screen: const DateCalculatorScreen(),
       ),
       _MenuItem(
-        title: 'সময় যোগ',
+        title: 'সময় যোগ',
         icon: Icons.access_time_rounded,
         screen: const TimeSumScreen(),
       ),
       _MenuItem(
-        title: 'দৈনিক গড়',
+        title: 'দৈনিক গড়',
         icon: Icons.bar_chart_rounded,
         screen: const DailyAverageScreen(),
       ),
       _MenuItem(
-        title: 'মাসিক গড়',
+        title: 'মাসিক গড়',
         icon: Icons.analytics_rounded,
         screen: const MonthlyAverageScreen(),
       ),
@@ -101,11 +101,17 @@ class HomeScreen extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: AppTheme.gold,
                           borderRadius: BorderRadius.circular(5),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppTheme.gold.withValues(alpha: 0.4),
+                              blurRadius: 6,
+                            ),
+                          ],
                         ),
                       ),
                       const SizedBox(width: 10),
                       const Text(
-                        'হিসাব ও প্রয়োজনীয় টুল',
+                        'হিসাব ও প্রয়োজনীয় টুল',
                         style: TextStyle(
                           color: AppTheme.textDark,
                           fontSize: 18,
@@ -194,7 +200,7 @@ class _HeaderCard extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.28),
+            color: Colors.black.withValues(alpha: 0.35),
             blurRadius: 22,
             offset: const Offset(0, 10),
           ),
@@ -212,6 +218,12 @@ class _HeaderCard extends StatelessWidget {
                 color: AppTheme.gold.withValues(alpha: 0.65),
                 width: 1,
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.gold.withValues(alpha: 0.2),
+                  blurRadius: 10,
+                ),
+              ],
             ),
             child: const Icon(
               Icons.calculate_rounded,
@@ -229,6 +241,7 @@ class _HeaderCard extends StatelessWidget {
               color: AppTheme.goldLight,
               fontSize: 17,
               fontWeight: FontWeight.bold,
+              letterSpacing: 0.5,
             ),
           ),
 
@@ -261,13 +274,21 @@ class _HeaderCard extends StatelessWidget {
           Container(
             height: 1,
             width: 100,
-            color: AppTheme.gold.withValues(alpha: 0.45),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.transparent,
+                  AppTheme.gold.withValues(alpha: 0.6),
+                  Colors.transparent,
+                ],
+              ),
+            ),
           ),
 
           const SizedBox(height: 10),
 
           Text(
-            'হিসাব, নোট, ক্যালেন্ডার ও প্রয়োজনীয় টুল এক জায়গায়',
+            'হিসাব, নোট, ক্যালেন্ডার ও প্রয়োজনীয় টুল এক জায়গায়',
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.72),
@@ -298,8 +319,8 @@ class _MenuCard extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(21),
-        splashColor: AppTheme.gold.withValues(alpha: 0.10),
-        highlightColor: AppTheme.gold.withValues(alpha: 0.05),
+        splashColor: AppTheme.gold.withValues(alpha: 0.15),
+        highlightColor: AppTheme.gold.withValues(alpha: 0.08),
         child: Ink(
           decoration: BoxDecoration(
             gradient: const LinearGradient(
@@ -317,7 +338,7 @@ class _MenuCard extends StatelessWidget {
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.18),
+                color: Colors.black.withValues(alpha: 0.22),
                 blurRadius: 10,
                 offset: const Offset(0, 5),
               ),
@@ -350,7 +371,7 @@ class _MenuCard extends StatelessWidget {
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: AppTheme.gold.withValues(alpha: 0.08),
+                        color: AppTheme.gold.withValues(alpha: 0.12),
                         blurRadius: 8,
                       ),
                     ],
@@ -441,7 +462,7 @@ class _BottomInfo extends StatelessWidget {
         const SizedBox(height: 8),
 
         Text(
-          'সহজ • সুন্দর • প্রয়োজনীয়',
+          'সহজ • সুন্দর • প্রয়োজনীয়',
           style: TextStyle(
             color: AppTheme.gold.withValues(alpha: 0.7),
             fontSize: 11,
@@ -468,67 +489,62 @@ class _IslamicBackground extends StatelessWidget {
 class _IslamicPatternPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final patternPaint = Paint()
-      ..color = AppTheme.gold.withValues(alpha: 0.025)
+    final goldPaint = Paint()
+      ..color = AppTheme.gold.withValues(alpha: 0.035)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.8;
+      ..strokeWidth = 0.9;
 
-    final darkPatternPaint = Paint()
-      ..color = AppTheme.green.withValues(alpha: 0.045)
+    final greenPaint = Paint()
+      ..color = AppTheme.green.withValues(alpha: 0.05)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.8;
+      ..strokeWidth = 0.9;
 
-    const spacing = 88.0;
+    const spacing = 96.0;
 
     for (double x = -spacing; x < size.width + spacing; x += spacing) {
       for (double y = -spacing; y < size.height + spacing; y += spacing) {
         final center = Offset(x, y);
 
-        final outerPath = Path();
+        // Draw 8-pointed Rub el Hizb Star
+        _drawEightPointStar(canvas, center, 28, goldPaint);
+        _drawEightPointStar(canvas, center, 18, greenPaint);
 
-        for (int i = 0; i < 8; i++) {
-          final angle = (pi / 4) * i;
-          final point = Offset(
-            center.dx + cos(angle) * 25,
-            center.dy + sin(angle) * 25,
-          );
+        // Outer connecting geometric lines
+        final diamondPath = Path();
+        diamondPath.moveTo(center.dx, center.dy - 42);
+        diamondPath.lineTo(center.dx + 42, center.dy);
+        diamondPath.lineTo(center.dx, center.dy + 42);
+        diamondPath.lineTo(center.dx - 42, center.dy);
+        diamondPath.close();
 
-          if (i == 0) {
-            outerPath.moveTo(point.dx, point.dy);
-          } else {
-            outerPath.lineTo(point.dx, point.dy);
-          }
-        }
-
-        outerPath.close();
-        canvas.drawPath(outerPath, patternPaint);
-
-        final innerPath = Path();
-
-        for (int i = 0; i < 8; i++) {
-          final angle = (pi / 4) * i + (pi / 8);
-          final point = Offset(
-            center.dx + cos(angle) * 15,
-            center.dy + sin(angle) * 15,
-          );
-
-          if (i == 0) {
-            innerPath.moveTo(point.dx, point.dy);
-          } else {
-            innerPath.lineTo(point.dx, point.dy);
-          }
-        }
-
-        innerPath.close();
-        canvas.drawPath(innerPath, darkPatternPaint);
-
-        canvas.drawCircle(
-          center,
-          7,
-          patternPaint,
-        );
+        canvas.drawPath(diamondPath, goldPaint);
       }
     }
+  }
+
+  void _drawEightPointStar(
+    Canvas canvas,
+    Offset center,
+    double radius,
+    Paint paint,
+  ) {
+    final path = Path();
+    final double innerRadius = radius * 0.5;
+
+    for (int i = 0; i < 16; i++) {
+      final double r = i.isEven ? radius : innerRadius;
+      final double angle = (i * pi / 8);
+      final double x = center.dx + r * cos(angle);
+      final double y = center.dy + r * sin(angle);
+
+      if (i == 0) {
+        path.moveTo(x, y);
+      } else {
+        path.lineTo(x, y);
+      }
+    }
+    path.close();
+    canvas.drawPath(path, paint);
   }
 
   @override
