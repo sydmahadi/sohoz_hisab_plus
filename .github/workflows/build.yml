@@ -24,6 +24,30 @@ jobs:
       - name: Flutter version
         run: flutter --version
 
+      - name: Recreate Android project
+        run: |
+          rm -rf android
+          flutter create --platforms=android --org com.example .
+
+      - name: Set app name
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path("android/app/src/main/AndroidManifest.xml")
+          text = path.read_text()
+
+          text = re.sub(
+              r'android:label="[^"]*"',
+              'android:label="সহজ হিসাব প্লাস"',
+              text,
+              count=1
+          )
+
+          path.write_text(text)
+          PY
+
       - name: Get dependencies
         run: flutter pub get
 
