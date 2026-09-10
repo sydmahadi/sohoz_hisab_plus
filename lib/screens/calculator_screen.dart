@@ -17,7 +17,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   void _numberPressed(String number) {
     setState(() {
-      if (display == '0' || shouldResetDisplay) {
+      if (display == '0' || display == 'ভুল' || shouldResetDisplay) {
         display = number;
         shouldResetDisplay = false;
       } else {
@@ -28,7 +28,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   void _decimalPressed() {
     setState(() {
-      if (shouldResetDisplay) {
+      if (display == 'ভুল' || shouldResetDisplay) {
         display = '0.';
         shouldResetDisplay = false;
         return;
@@ -154,53 +154,84 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   Widget _button({
     required String text,
     required VoidCallback onPressed,
-    bool isOperator = false,
-    bool isEqual = false,
-    bool isClear = false,
+    Color? backgroundColor,
+    Color? textColor,
+    double height = 68,
   }) {
-    Color backgroundColor;
-    Color foregroundColor;
-
-    if (isEqual) {
-      backgroundColor = AppTheme.gold;
-      foregroundColor = Colors.white;
-    } else if (isClear) {
-      backgroundColor = const Color(0xFF7A3028);
-      foregroundColor = Colors.white;
-    } else if (isOperator) {
-      backgroundColor = AppTheme.green;
-      foregroundColor = Colors.white;
-    } else {
-      backgroundColor = AppTheme.cardColor;
-      foregroundColor = AppTheme.textDark;
-    }
-
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.all(5),
         child: Material(
-          color: backgroundColor,
+          color: backgroundColor ?? AppTheme.cardColor,
           borderRadius: BorderRadius.circular(18),
           child: InkWell(
             onTap: onPressed,
             borderRadius: BorderRadius.circular(18),
+            splashColor: AppTheme.gold.withValues(alpha: 0.15),
+            highlightColor: AppTheme.gold.withValues(alpha: 0.06),
             child: Container(
-              height: 68,
+              height: height,
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(18),
                 border: Border.all(
-                  color: AppTheme.gold.withOpacity(0.35),
+                  color: AppTheme.gold.withValues(alpha: 0.20),
                   width: 0.6,
                 ),
               ),
               child: Text(
                 text,
                 style: TextStyle(
-                  color: foregroundColor,
-                  fontSize: text == '⌫' ? 24 : 22,
-                  fontWeight: FontWeight.bold,
+                  color: textColor ?? AppTheme.textDark,
+                  fontSize: text == '⌫' ? 24 : 21,
+                  fontWeight: FontWeight.w700,
                 ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _equalButton() {
+    return Padding(
+      padding: const EdgeInsets.all(5),
+      child: Material(
+        color: AppTheme.gold,
+        borderRadius: BorderRadius.circular(18),
+        child: InkWell(
+          onTap: _calculate,
+          borderRadius: BorderRadius.circular(18),
+          splashColor: Colors.white.withValues(alpha: 0.18),
+          child: Container(
+            width: double.infinity,
+            height: 68,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  AppTheme.goldLight,
+                  AppTheme.gold,
+                ],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.gold.withValues(alpha: 0.18),
+                  blurRadius: 12,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            ),
+            child: const Text(
+              '=',
+              style: TextStyle(
+                color: Color(0xFF07140F),
+                fontSize: 28,
+                fontWeight: FontWeight.w900,
               ),
             ),
           ),
@@ -218,45 +249,58 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.fromLTRB(14, 10, 14, 14),
           child: Column(
             children: [
               // Display
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 26,
+                padding: const EdgeInsets.fromLTRB(
+                  20,
+                  18,
+                  20,
+                  22,
                 ),
                 decoration: BoxDecoration(
-                  color: AppTheme.darkGreen,
                   borderRadius: BorderRadius.circular(24),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AppTheme.cardLight,
+                      AppTheme.cardColor,
+                    ],
+                  ),
                   border: Border.all(
-                    color: AppTheme.gold.withOpacity(0.65),
-                    width: 0.8,
+                    color: AppTheme.gold.withValues(alpha: 0.30),
+                    width: 0.7,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: AppTheme.darkGreen.withOpacity(0.2),
-                      blurRadius: 15,
-                      offset: const Offset(0, 7),
+                      color: Colors.black.withValues(alpha: 0.20),
+                      blurRadius: 18,
+                      offset: const Offset(0, 8),
                     ),
                   ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    if (operator != null)
-                      Text(
-                        '${_formatResult(firstNumber ?? 0)} $operator',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.6),
-                          fontSize: 15,
-                        ),
-                      ),
-
-                    const SizedBox(height: 8),
-
+                    SizedBox(
+                      height: 22,
+                      child: operator != null
+                          ? Text(
+                              '${_formatResult(firstNumber ?? 0)} $operator',
+                              style: TextStyle(
+                                color: AppTheme.goldLight
+                                    .withValues(alpha: 0.70),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            )
+                          : null,
+                    ),
+                    const SizedBox(height: 6),
                     FittedBox(
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerRight,
@@ -264,9 +308,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                         display,
                         maxLines: 1,
                         style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 42,
-                          fontWeight: FontWeight.bold,
+                          color: AppTheme.textDark,
+                          fontSize: 44,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                     ),
@@ -274,18 +318,20 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 ),
               ),
 
-              const SizedBox(height: 14),
+              const SizedBox(height: 12),
 
-              // Calculator buttons
+              // Calculator
               Expanded(
                 child: Column(
                   children: [
+                    // AC | Backspace | Divide | Multiply
                     Row(
                       children: [
                         _button(
                           text: 'AC',
                           onPressed: _clear,
-                          isClear: true,
+                          backgroundColor: const Color(0xFF6D302A),
+                          textColor: Colors.white,
                         ),
                         _button(
                           text: '⌫',
@@ -294,16 +340,19 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                         _button(
                           text: '÷',
                           onPressed: () => _operatorPressed('÷'),
-                          isOperator: true,
+                          backgroundColor: AppTheme.primaryLight,
+                          textColor: Colors.white,
                         ),
                         _button(
                           text: '×',
                           onPressed: () => _operatorPressed('×'),
-                          isOperator: true,
+                          backgroundColor: AppTheme.primaryLight,
+                          textColor: Colors.white,
                         ),
                       ],
                     ),
 
+                    // 7 | 8 | 9 | -
                     Row(
                       children: [
                         _button(
@@ -321,11 +370,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                         _button(
                           text: '-',
                           onPressed: () => _operatorPressed('-'),
-                          isOperator: true,
+                          backgroundColor: AppTheme.primaryLight,
+                          textColor: Colors.white,
                         ),
                       ],
                     ),
 
+                    // 4 | 5 | 6 | +
                     Row(
                       children: [
                         _button(
@@ -343,11 +394,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                         _button(
                           text: '+',
                           onPressed: () => _operatorPressed('+'),
-                          isOperator: true,
+                          backgroundColor: AppTheme.primaryLight,
+                          textColor: Colors.white,
                         ),
                       ],
                     ),
 
+                    // 1 | 2 | 3 | =
                     Row(
                       children: [
                         _button(
@@ -365,11 +418,14 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                         _button(
                           text: '=',
                           onPressed: _calculate,
-                          isEqual: true,
+                          backgroundColor: AppTheme.gold,
+                          textColor: const Color(0xFF07140F),
+                          height: 143,
                         ),
                       ],
                     ),
 
+                    // 0 | 00 | .
                     Row(
                       children: [
                         _button(
@@ -384,10 +440,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                           text: '.',
                           onPressed: _decimalPressed,
                         ),
-                        _button(
-                          text: '=',
-                          onPressed: _calculate,
-                          isEqual: true,
+
+                        // Empty space under =
+                        const Expanded(
+                          child: SizedBox(
+                            height: 68,
+                          ),
                         ),
                       ],
                     ),
